@@ -1,0 +1,983 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Debox</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Debox is a prison mining Minecraft server for Java and Bedrock. Dig through six worlds, rebirth, raise pets, run a gang and climb the ladder. Join at debox.global.">
+<meta name="theme-color" content="#ffd23d">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Debox">
+<meta property="og:title" content="Debox: prison mining, reinvented">
+<meta property="og:description" content="Java + Bedrock prison mining server. Dig through 53 materials across six worlds, rebirth, raise pets and run a gang. Join at debox.global.">
+<meta name="twitter:card" content="summary">
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600&family=Silkscreen&display=swap">
+<style>
+/* Layout: one long dig. The page descends through Debox's six worlds like a mineshaft,
+   each band tinted by its stratum, with the join box riding at the surface. */
+:root {
+  color-scheme: dark;
+  --stone: #110f0c;        /* page ground: warm deepslate */
+  --stone-2: #1a1712;      /* raised surfaces */
+  --seam: #2c2720;         /* hairlines, borders */
+  --dust: #a39886;         /* secondary text */
+  --bone: #efe8d8;         /* primary text */
+  --gold: #ffd23d;         /* the MOTD gold, the one accent */
+  --gold-ink: #1c1600;     /* text on gold */
+  --ok: #6fdc8c;
+  --down: #ff6b5e;
+
+  /* strata tints, one per world */
+  --w-over: #6fae4a;
+  --w-park: #c9a36a;
+  --w-deep: #d07a4a;
+  --w-neth: #e2493a;
+  --w-end:  #c9b8ff;
+  --w-ocean:#4fd1c5;
+
+  --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Figtree", "Segoe UI", system-ui, sans-serif;
+  --f-pixel: "Silkscreen", ui-monospace, "Consolas", monospace;
+
+  --step--1: 0.8125rem;
+  --step-0: 1rem;
+  --step-1: 1.25rem;
+  --step-2: 1.75rem;
+  --step-3: clamp(2rem, 4.5vw, 3rem);
+  --step-4: clamp(2.75rem, 8vw, 5.5rem);
+
+  --wrap: 72rem;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation: none !important; transition: none !important; } }
+body {
+  margin: 0;
+  background: var(--stone);
+  color: var(--bone);
+  font: 400 var(--step-0)/1.6 var(--f-body);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 4px; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; line-height: 1.05; }
+p { margin: 0; }
+
+.wrap {
+  max-width: var(--wrap);
+  margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.label {
+  font-family: var(--f-pixel);
+  font-size: var(--step--1);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dust);
+}
+
+/* ---------- nav ---------- */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--stone); }
+.nav {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 9;
+  background: color-mix(in srgb, var(--stone) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--seam);
+}
+.nav .wrap { display: flex; align-items: center; gap: 1.5rem; padding-block: 0.75rem; }
+.brand { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; font-family: var(--f-display); font-weight: 800; font-size: 1.25rem; letter-spacing: 0.02em; }
+.brand-mark { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; }
+.hero-logo { display: block; width: clamp(140px, 22vw, 210px); height: auto; aspect-ratio: 1; border-radius: 16px; border: 1px solid var(--seam); box-shadow: 0 12px 40px rgba(0,0,0,.5); margin-bottom: 1.75rem; }
+.nav-links { display: flex; gap: 1.25rem; margin-left: auto; }
+.nav-links a { text-decoration: none; color: var(--dust); font-weight: 500; font-size: 0.95rem; }
+.nav-links a:hover { color: var(--bone); }
+.nav-cta { display: flex; gap: 0.5rem; }
+.nav-menu { display: none; width: 2.5rem; height: 2.5rem; padding: 0; border: 1px solid var(--seam); border-radius: 6px; background: var(--stone-2); cursor: pointer; flex-direction: column; justify-content: center; align-items: center; gap: 4px; }
+.nav-menu i { display: block; width: 16px; height: 2px; background: var(--bone); transition: transform .25s ease, opacity .2s ease; }
+.nav-menu[aria-expanded="true"] i:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.nav-menu[aria-expanded="true"] i:nth-child(2) { opacity: 0; }
+.nav-menu[aria-expanded="true"] i:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+@media (max-width: 960px) {
+  .nav .wrap { gap: 0.75rem; }
+  .nav-cta { margin-left: auto; }
+  .nav-menu { display: flex; }
+  .nav-links { display: none; position: absolute; top: 100%; left: 0; right: 0; margin: 0; flex-direction: column; gap: 0; padding: 0.25rem max(16px, env(safe-area-inset-left, 0px)) 0.75rem; background: var(--stone); border-bottom: 1px solid var(--seam); }
+  .nav-links.open { display: flex; }
+  .nav-links a { padding: 0.8rem 0; border-bottom: 1px solid var(--seam); font-size: 1rem; color: var(--bone); }
+  .nav-links a:last-child { border-bottom: 0; }
+}
+@media (max-width: 380px) { .brand-text { display: none; } }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font: 600 0.95rem/1 var(--f-body);
+  padding: 0.7rem 1.1rem; border-radius: 6px;
+  text-decoration: none; cursor: pointer; border: 1px solid var(--seam);
+  background: var(--stone-2); color: var(--bone);
+  transition: transform .12s ease, background .12s ease, border-color .12s ease;
+}
+.btn:hover { border-color: var(--dust); }
+.btn:active { transform: translateY(1px); }
+.btn-gold { background: var(--gold); color: var(--gold-ink); border-color: var(--gold); box-shadow: 0 3px 0 #b8901a; }
+.btn-gold:hover { background: #ffdc5e; border-color: #ffdc5e; }
+
+/* ---------- hero / surface ---------- */
+.surface { position: relative; overflow: hidden; border-bottom: 1px solid var(--seam); }
+.surface { cursor: crosshair; }
+.surface .join { cursor: default; }
+.surface canvas { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .7; }
+.surface::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 30%, var(--stone) 100%); pointer-events: none; }
+.hero { position: relative; z-index: 1; display: grid; grid-template-columns: 1.25fr 1fr; gap: 3rem; align-items: end; padding-block: 5rem 4rem; }
+@media (max-width: 880px) { .hero { grid-template-columns: 1fr; gap: 2.5rem; padding-block: 3.5rem 3rem; } }
+.hero h1 { font-size: var(--step-4); font-weight: 800; letter-spacing: -0.02em; }
+.hero h1 em { font-style: normal; color: var(--gold); }
+.hero .lede { margin-top: 1.25rem; max-width: 34rem; font-size: var(--step-1); color: var(--dust); line-height: 1.5; }
+.hero .label { margin-bottom: 1rem; display: block; }
+
+.join { background: var(--stone-2); border: 1px solid var(--seam); border-radius: 10px; padding: 1.25rem; display: grid; gap: 0.9rem; min-width: 0; }
+.join-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.status { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--dust); font-variant-numeric: tabular-nums; }
+.status i { width: 9px; height: 9px; border-radius: 50%; background: var(--dust); }
+.status[data-state="up"] i { background: var(--ok); box-shadow: 0 0 0 4px color-mix(in srgb, var(--ok) 22%, transparent); }
+.status[data-state="down"] i { background: var(--down); }
+.addr { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 0.75rem; padding: 0.85rem 0.9rem; border: 1px solid var(--seam); border-radius: 8px; background: var(--stone); min-width: 0; }
+.addr .label { display: block; margin-bottom: 0.2rem; }
+.addr code { font: 600 1.15rem/1.2 var(--f-body); color: var(--bone); overflow-wrap: anywhere; }
+.addr code span { color: var(--dust); font-weight: 500; }
+.copy { font: 600 0.85rem/1 var(--f-body); padding: 0.55rem 0.8rem; border-radius: 6px; border: 1px solid var(--seam); background: var(--stone-2); color: var(--bone); cursor: pointer; min-width: 4.8rem; }
+.copy:hover { border-color: var(--gold); }
+.copy.done { background: var(--gold); color: var(--gold-ink); border-color: var(--gold); }
+.join-foot { font-size: 0.85rem; color: var(--dust); }
+.addr-toggle { display: block; min-width: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.addr-toggle .more { color: var(--gold); margin-left: 0.4rem; white-space: nowrap; }
+.addr-toggle .more::after { content: ""; display: inline-block; width: 5px; height: 5px; margin: 0 0 2px 0.45rem; border: solid currentColor; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); transition: transform .25s ease; }
+.addr-toggle[aria-expanded="true"] .more::after { transform: translateY(2px) rotate(225deg); }
+.addr code { transition: color .15s ease; }
+.addr-toggle:hover code { color: var(--gold); }
+.steps { display: grid; grid-template-rows: 0fr; margin-top: -0.9rem; transition: grid-template-rows .35s cubic-bezier(.2,.7,.2,1), margin-top .35s ease; }
+.steps.open { grid-template-rows: 1fr; margin-top: 0; }
+.steps ol { overflow: hidden; min-height: 0; list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
+.steps li { display: grid; grid-template-columns: 1.9rem 1fr; gap: 0.75rem; align-items: start; padding: 0.75rem 0.85rem; border: 1px solid var(--seam); border-radius: 8px; background: var(--stone); opacity: 0; transform: translateY(-6px); transition: opacity .3s ease, transform .3s ease; }
+.steps.open li { opacity: 1; transform: none; }
+.steps.open li:nth-child(2) { transition-delay: .07s; }
+.steps.open li:nth-child(3) { transition-delay: .14s; }
+.steps li b { display: grid; place-items: center; width: 1.9rem; height: 1.9rem; border-radius: 4px; background: var(--gold); color: var(--gold-ink); font: 400 0.85rem/1 var(--f-pixel); }
+.steps li strong { display: block; font-weight: 600; }
+.steps li p { color: var(--dust); font-size: 0.9rem; margin-top: 0.15rem; }
+.steps li code { font: 600 0.9rem var(--f-body); color: var(--bone); }
+
+/* ---------- section scaffolding ---------- */
+section { padding-block: 5rem; }
+.sec-head { display: grid; gap: 0.75rem; max-width: 44rem; margin-bottom: 2.5rem; }
+.sec-head h2 { font-size: var(--step-3); font-weight: 800; letter-spacing: -0.01em; }
+.sec-head p { color: var(--dust); font-size: 1.075rem; }
+
+/* ---------- the dig: world strata ---------- */
+.shaft { display: grid; border-left: 2px dashed var(--seam); margin-left: 0.5rem; }
+.stratum {
+  --c: var(--w-over);
+  position: relative;
+  display: grid; grid-template-columns: 9rem 1fr auto; gap: 1.5rem; align-items: center;
+  padding: 1.5rem 1.25rem 1.5rem 2rem;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--c) 14%, transparent), transparent 70%);
+  border-bottom: 1px solid var(--seam);
+}
+.stratum::before {
+  content: ""; position: absolute; left: -7px; top: 50%; width: 12px; height: 12px; margin-top: -6px;
+  background: var(--c); transform: rotate(45deg);
+}
+.stratum .ranks { font-family: var(--f-pixel); font-size: 0.9rem; color: var(--c); font-variant-numeric: tabular-nums; }
+.stratum h3 { font-size: var(--step-2); font-weight: 700; }
+.stratum p { color: var(--dust); margin-top: 0.3rem; max-width: 40rem; }
+.stratum .boss { font-family: var(--f-pixel); font-size: 0.75rem; color: var(--c); border: 1px solid color-mix(in srgb, var(--c) 50%, transparent); padding: 0.35rem 0.55rem; border-radius: 4px; white-space: nowrap; }
+.stratum > div { min-width: 0; }
+@media (max-width: 720px) {
+  .stratum { grid-template-columns: 1fr; gap: 0.4rem; }
+  .stratum .boss { justify-self: start; margin-top: 0.4rem; }
+}
+.s-over  { --c: var(--w-over); }
+.s-park  { --c: var(--w-park); }
+.s-deep  { --c: var(--w-deep); }
+.s-neth  { --c: var(--w-neth); }
+.s-end   { --c: var(--w-end); }
+.s-ocean { --c: var(--w-ocean); }
+.shaft-foot { margin-top: 1.25rem; color: var(--dust); font-size: 0.95rem; }
+
+/* ---------- features ---------- */
+.feat { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-top: 1px solid var(--seam); }
+@media (max-width: 960px) { .feat { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px) { .feat { grid-template-columns: 1fr; } }
+.feat article { padding: 1.75rem 1.5rem 1.75rem 0; border-bottom: 1px solid var(--seam); display: grid; gap: 0.5rem; align-content: start; min-width: 0; }
+.feat article + article { padding-left: 0; }
+@media (min-width: 961px) { .feat article:not(:nth-child(3n+1)) { padding-left: 1.5rem; border-left: 1px solid var(--seam); } }
+@media (min-width: 601px) and (max-width: 960px) { .feat article:nth-child(2n) { padding-left: 1.5rem; border-left: 1px solid var(--seam); } }
+.feat h3 { font-size: var(--step-1); font-weight: 700; }
+.feat p { color: var(--dust); }
+.feat .cmd { font-family: var(--f-pixel); font-size: 0.75rem; color: var(--gold); }
+
+/* ---------- vote + store ---------- */
+.band { background: var(--stone-2); border-block: 1px solid var(--seam); }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; }
+@media (max-width: 880px) { .two { grid-template-columns: 1fr; gap: 3.5rem; } }
+.two > div { min-width: 0; }
+.perks { list-style: none; padding: 0; margin: 0 0 1.75rem; display: grid; gap: 0.6rem; }
+.perks li { display: grid; grid-template-columns: 1.25rem 1fr; gap: 0.6rem; color: var(--bone); }
+.perks li::before { content: ""; width: 8px; height: 8px; margin-top: 0.55em; background: var(--gold); transform: rotate(45deg); }
+.sites { display: grid; grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr)); gap: 0.5rem; }
+.sites a { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; padding: 0.75rem 0.9rem; border: 1px solid var(--seam); border-radius: 6px; text-decoration: none; background: var(--stone); font-weight: 500; }
+.sites a:hover { border-color: var(--gold); }
+.sites a span { font-family: var(--f-pixel); font-size: 0.7rem; color: var(--dust); }
+
+.ranks-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0 0 1.75rem; }
+.ranks-row b { font-family: var(--f-pixel); font-weight: 400; font-size: 0.8rem; padding: 0.35rem 0.55rem; border-radius: 4px; background: var(--stone); border: 1px solid var(--seam); color: var(--r); }
+
+.vote-meter { display: grid; gap: 0.45rem; margin-bottom: 0.9rem; }
+.vote-meter b { font-weight: 400; color: var(--gold); }
+.vote-bar { height: 6px; border-radius: 3px; background: var(--stone); border: 1px solid var(--seam); overflow: hidden; }
+.vote-bar i { display: block; height: 100%; width: 0; background: var(--gold); transition: width .4s cubic-bezier(.2,.7,.2,1); }
+.sites a[data-voted] { border-color: color-mix(in srgb, var(--ok) 45%, var(--seam)); color: var(--dust); }
+.sites a[data-voted] span { color: var(--ok); display: inline-flex; align-items: center; gap: 0.4rem; }
+.sites a[data-voted] span::before { content: ""; width: 4px; height: 8px; margin-top: -2px; border: solid currentColor; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+
+/* ---------- leaderboards ---------- */
+.lb-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem 1.5rem; margin-bottom: 1.5rem; }
+.lb-tabs { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.lb-tabs button, .lb-scope button { font: 600 0.9rem/1 var(--f-body); padding: 0.6rem 0.8rem; border-radius: 6px; border: 1px solid var(--seam); background: var(--stone); color: var(--dust); cursor: pointer; transition: color .15s ease, border-color .15s ease; }
+.lb-tabs button:hover, .lb-scope button:hover { color: var(--bone); border-color: var(--dust); }
+.lb-tabs button[aria-selected="true"] { color: var(--gold-ink); background: var(--gold); border-color: var(--gold); }
+.lb-scope { display: inline-flex; padding: 3px; border: 1px solid var(--seam); border-radius: 8px; background: var(--stone); }
+.lb-scope button { border: 0; background: none; padding: 0.5rem 0.75rem; }
+.lb-scope button[aria-pressed="true"] { background: var(--stone-2); color: var(--bone); box-shadow: inset 0 0 0 1px var(--seam); }
+.lb-scope button:disabled { opacity: .35; cursor: not-allowed; }
+.lb-scope button:disabled:hover { color: var(--dust); }
+
+.lb { display: grid; grid-template-columns: 1.1fr 1fr; gap: 1.5rem; align-items: start; min-height: 22rem; }
+@media (max-width: 880px) { .lb { grid-template-columns: 1fr; min-height: 0; } }
+.lb ol { list-style: none; margin: 0; padding: 0; }
+.lb-podium { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; align-items: end; }
+.lb-podium li { --m: var(--gold); display: grid; justify-items: center; gap: 0.35rem; text-align: center; padding: 1.1rem 0.6rem 1rem; border: 1px solid var(--seam); border-top: 3px solid var(--m); border-radius: 8px; background: linear-gradient(180deg, color-mix(in srgb, var(--m) 12%, var(--stone)), var(--stone) 70%); min-width: 0; animation: rise .5s cubic-bezier(.2,.7,.2,1) both; }
+.lb-podium li:nth-child(1) { order: 2; padding-block: 1.6rem 1.25rem; }
+.lb-podium li:nth-child(2) { --m: #c9ccd6; order: 1; animation-delay: .06s; }
+.lb-podium li:nth-child(3) { --m: #d08a4a; order: 3; animation-delay: .12s; }
+.lb-podium .rk { font: 400 0.8rem/1 var(--f-pixel); color: var(--m); }
+.lb-podium img { width: 56px; height: 56px; image-rendering: pixelated; border-radius: 4px; box-shadow: 0 6px 18px rgba(0,0,0,.45); }
+.lb-podium li:nth-child(1) img { width: 76px; height: 76px; }
+.lb-podium .nm { font-weight: 600; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lb-podium .vl { font: 400 0.75rem/1.2 var(--f-pixel); color: var(--m); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.lb-list { display: grid; gap: 0.35rem; }
+.lb-list li { display: grid; grid-template-columns: 1.75rem 28px 1fr auto; gap: 0.7rem; align-items: center; padding: 0.5rem 0.8rem; border: 1px solid var(--seam); border-radius: 6px; background: var(--stone); min-width: 0; animation: rise .4s cubic-bezier(.2,.7,.2,1) both; }
+.lb-list .rk { font: 400 0.75rem/1 var(--f-pixel); color: var(--dust); }
+.lb-list img { width: 28px; height: 28px; image-rendering: pixelated; border-radius: 3px; }
+.lb-list .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.lb-list .vl { font-size: 0.9rem; color: var(--dust); font-variant-numeric: tabular-nums; text-align: right; }
+.lb-empty { grid-column: 1 / -1; padding: 3rem 1rem; text-align: center; color: var(--dust); border: 1px dashed var(--seam); border-radius: 8px; }
+.lb-foot { margin-top: 1.25rem; display: block; }
+.lb-foot i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--ok); margin-right: 0.45rem; vertical-align: 1px; }
+@media (max-width: 480px) { .lb-podium { gap: 0.4rem; } .lb-podium li { padding-inline: 0.35rem; } .lb-podium img { width: 44px; height: 44px; } .lb-podium li:nth-child(1) img { width: 60px; height: 60px; } }
+
+/* ---------- patch notes: Discord markdown in the site's skin ---------- */
+.pn { display: grid; grid-template-columns: 11rem 1fr; gap: 1.5rem; align-items: start; }
+@media (max-width: 720px) { .pn { grid-template-columns: 1fr; gap: 1rem; } }
+.pn-tabs { display: grid; gap: 0.35rem; position: sticky; top: 5rem; }
+@media (max-width: 720px) { .pn-tabs { position: static; display: flex; flex-wrap: wrap; } }
+.pn-tabs button { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; padding: 0.6rem 0.75rem; border: 1px solid var(--seam); border-radius: 6px; background: var(--stone); color: var(--dust); font: 600 0.95rem/1 var(--f-body); font-variant-numeric: tabular-nums; cursor: pointer; text-align: left; transition: border-color .15s ease, color .15s ease; }
+.pn-tabs button:hover { color: var(--bone); border-color: var(--dust); }
+.pn-tabs button[aria-selected="true"] { color: var(--bone); border-color: var(--gold); background: var(--stone-2); }
+.pn-tabs button small { font: 400 0.65rem/1 var(--f-pixel); text-transform: uppercase; color: var(--dust); }
+.pn-tabs button small.new { color: var(--gold); }
+.pn-tabs button[hidden] { display: none; }
+.pn-end { display: inline-flex; align-items: center; gap: 0.55rem; }
+.pn-tabs .chev { width: 6px; height: 6px; margin-bottom: 3px; border: solid currentColor; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); transition: transform .25s ease; }
+.pn-tabs button[aria-expanded="true"] .chev { margin: 3px 0 0; transform: rotate(225deg); }
+.pn-tabs button.minor { margin-left: 0.9rem; padding: 0.45rem 0.7rem; font-size: 0.85rem; background: transparent; color: color-mix(in srgb, var(--dust) 55%, var(--stone)); border-color: color-mix(in srgb, var(--seam) 70%, var(--stone)); animation: drop .25s ease both; }
+.pn-tabs button.minor small { color: inherit; }
+.pn-tabs button.minor:hover { color: var(--dust); }
+.pn-tabs button.minor[aria-selected="true"] { color: var(--bone); border-color: var(--gold); background: var(--stone-2); }
+@keyframes drop { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.pn-body { background: var(--stone-2); border: 1px solid var(--seam); border-radius: 10px; padding: 1.5rem 1.5rem 1.75rem; min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 600px) { .pn-body { padding: 1.1rem 1rem 1.25rem; } }
+
+.md h3, .md h4, .md h5 { font-family: var(--f-display); line-height: 1.2; }
+.md h3 { font-size: var(--step-2); font-weight: 800; margin: 0 0 0.5rem; }
+.md h4 { font-size: 1.3rem; font-weight: 700; margin: 1.4rem 0 0.4rem; }
+.md h5 { font-size: 1.05rem; font-weight: 700; margin: 0.5rem 0 0; }
+.md > :first-child { margin-top: 0; }
+.md p { margin: 0.3rem 0 0; }
+.md p.sub { font-size: 0.8rem; color: var(--dust); margin-top: 0.1rem; line-height: 1.45; }
+.md blockquote { margin: 0.4rem 0; padding: 0.05rem 0 0.35rem 0.9rem; border-left: 4px solid var(--seam); border-radius: 2px; }
+.md blockquote > :first-child { margin-top: 0.3rem; }
+.md ul { margin: 0.3rem 0 0; padding-left: 1.25rem; }
+.md code { font: 500 0.85em/1 ui-monospace, "Consolas", monospace; background: var(--stone); border: 1px solid var(--seam); padding: 0.12em 0.35em; border-radius: 4px; color: var(--gold); }
+.md a { color: var(--gold); }
+.md .spoiler { background: var(--seam); color: transparent; border-radius: 3px; cursor: pointer; transition: color .15s ease; }
+.md .spoiler.shown { background: color-mix(in srgb, var(--seam) 60%, transparent); color: inherit; cursor: auto; }
+
+/* ---------- faq ---------- */
+.faq-wrap { display: grid; grid-template-columns: 1fr 1.6fr; gap: 3rem; align-items: start; }
+@media (max-width: 880px) { .faq-wrap { grid-template-columns: 1fr; gap: 0; } }
+.faq { border-top: 1px solid var(--seam); }
+.faq details { border-bottom: 1px solid var(--seam); }
+.faq summary { list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1.05rem 0; cursor: pointer; font: 600 1.075rem/1.35 var(--f-body); transition: color .15s ease; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: ""; flex: none; width: 7px; height: 7px; margin-right: 4px; border: solid var(--gold); border-width: 0 2px 2px 0; transform: rotate(45deg); transition: transform .25s ease; }
+.faq details[open] summary::after { transform: rotate(225deg); }
+.faq summary:hover { color: var(--gold); }
+.faq details p { color: var(--dust); padding: 0 2rem 1.15rem 0; }
+.faq code { font: 500 0.9em ui-monospace, "Consolas", monospace; color: var(--bone); }
+
+/* ---------- discord + footer ---------- */
+.cta { text-align: left; display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: center; }
+@media (max-width: 720px) { .cta { grid-template-columns: 1fr; } }
+.cta h2 { font-size: var(--step-3); font-weight: 800; }
+.cta p { color: var(--dust); margin-top: 0.6rem; max-width: 36rem; }
+.cta-btns { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.btn .yt { width: 20px; height: 14px; flex: none; }
+footer { border-top: 1px solid var(--seam); padding-block: 2rem 2.5rem; color: var(--dust); font-size: 0.85rem; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; justify-content: space-between; }
+footer nav { display: flex; gap: 1.25rem; flex-wrap: wrap; }
+footer a { text-decoration: none; }
+footer a:hover { color: var(--bone); }
+
+/* ---------- motion ---------- */
+@keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+.hero-logo, .hero .label, .hero h1, .hero .lede, .hero .hint, .join { animation: rise .8s cubic-bezier(.2,.7,.2,1) both; }
+.hero h1 { animation-delay: .08s; }
+.hero .lede { animation-delay: .18s; }
+.hero .hint { animation-delay: .5s; }
+.join { animation-delay: .28s; }
+
+.hero h1 em {
+  background: linear-gradient(100deg, var(--gold) 40%, #fff6c9 50%, var(--gold) 60%) 0 0 / 300% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: shimmer 5s ease-in-out 1s infinite;
+}
+@keyframes shimmer { 0% { background-position: 100% 0; } 40%, 100% { background-position: 0 0; } }
+
+.hint { margin-top: 1.5rem; color: var(--gold); opacity: .8; }
+
+.status[data-state="up"] i { position: relative; }
+.status[data-state="up"] i::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--ok); animation: ping 2s ease-out infinite; }
+@keyframes ping { from { transform: scale(1); opacity: .7; } to { transform: scale(3); opacity: 0; } }
+
+.btn-gold { position: relative; overflow: hidden; }
+.btn-gold::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.55) 50%, transparent 70%); transform: translateX(-120%); }
+.btn-gold:hover::after { transform: translateX(120%); transition: transform .6s ease; }
+
+.ticker { overflow: hidden; background: var(--stone-2); border-bottom: 1px solid var(--seam); padding-block: .9rem; }
+.ticker-track { display: flex; width: max-content; animation: slide 110s linear infinite; font-family: var(--f-pixel); font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; }
+.ticker:hover .ticker-track { animation-play-state: paused; }
+.ticker span { display: inline-flex; align-items: center; gap: .5rem; white-space: nowrap; color: var(--c); padding-right: 2rem; }
+.ticker span b { font-weight: 400; color: var(--dust); font-variant-numeric: tabular-nums; }
+.ticker span::after { content: ""; width: 5px; height: 5px; margin-left: 1.5rem; background: var(--seam); transform: rotate(45deg); }
+@keyframes slide { to { transform: translateX(-50%); } }
+
+.stratum { transition: padding-left .3s ease, background-color .3s ease; }
+.stratum::before { transition: transform .3s ease, box-shadow .3s ease; }
+.stratum:hover { padding-left: 2.6rem; background-color: color-mix(in srgb, var(--c) 8%, transparent); }
+.stratum:hover::before { transform: rotate(225deg) scale(1.3); box-shadow: 0 0 14px var(--c); }
+.stratum .boss { animation: glow 2.4s ease-in-out infinite; }
+@keyframes glow { 50% { box-shadow: 0 0 12px color-mix(in srgb, var(--c) 45%, transparent); } }
+
+.feat article { transition: transform .25s ease; }
+.feat article:hover { transform: translateY(-4px); }
+.feat article h3 { transition: color .25s ease; }
+.feat article:hover h3 { color: var(--gold); }
+.feat .cmd { justify-self: start; background: linear-gradient(var(--gold), var(--gold)) 0 100% / 0 1px no-repeat; transition: background-size .3s ease; padding-bottom: 2px; }
+.feat article:hover .cmd { background-size: 100% 1px; }
+
+.sites a, .ranks-row b { transition: transform .2s ease, border-color .2s ease; }
+.sites a:hover { transform: translateY(-2px); }
+.ranks-row b:hover { transform: translateY(-2px) scale(1.05); border-color: var(--r); }
+
+@supports (animation-timeline: view()) {
+  @keyframes reveal { from { opacity: .3; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+  @keyframes reveal-x { from { opacity: .3; transform: translateX(-28px); } to { opacity: 1; transform: none; } }
+  @keyframes dig { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+  .sec-head, .feat article, .sites a, .cta, .perks li { animation: reveal linear both; animation-timeline: view(); animation-range: entry 0% entry 70%; }
+  .stratum > * { animation: reveal-x linear both; animation-timeline: view(); animation-range: entry 0% entry 80%; }
+  .shaft { position: relative; }
+  .shaft::after { content: ""; position: absolute; left: -2px; top: 0; width: 2px; height: 100%; background: linear-gradient(var(--w-over), var(--w-park), var(--w-deep), var(--w-neth), var(--w-end), var(--w-ocean)); transform-origin: top; animation: dig linear both; animation-timeline: view(); animation-range: entry 40% exit 40%; }
+}
+</style>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Debox home">
+      <img class="brand-mark" src="logo.png" alt="">
+      <span class="brand-text">DEBOX</span>
+    </a>
+    <nav class="nav-links" id="nav-links" aria-label="Sections">
+      <a href="#features">Features</a>
+      <a href="#leaderboards">Leaderboards</a>
+      <a href="#patches">Patch notes</a>
+      <a href="#vote">Vote</a>
+      <a href="#store">Store</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn" href="https://debox.tebex.io" target="_blank" rel="noopener">Store</a>
+      <a class="btn btn-gold" href="https://discord.gg/ATyJkaeKTv" target="_blank" rel="noopener">Discord</a>
+    </div>
+    <button class="nav-menu" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav-links"><i></i><i></i><i></i></button>
+  </div>
+</header>
+
+<main id="top">
+  <div class="surface">
+    <canvas id="ore" aria-hidden="true"></canvas>
+    <div class="wrap hero">
+      <div>
+        <span class="label">Java + Bedrock &middot; Minecraft 1.21+</span>
+        <h1>Prison mining, <em>reinvented.</em></h1>
+        <p class="lede">Start with wood. Dig through 53 materials across six worlds, rebirth for permanent power, and fight the bosses waiting at the bottom of the Nether and the End.</p>
+        <p class="label hint" id="hint">Click the stone wall to mine it</p>
+      </div>
+
+      <div class="join" aria-label="How to join">
+        <div class="join-head">
+          <span class="label">Join the server</span>
+          <span class="status" id="status" data-state="unknown"><i></i><span id="status-text">Checking status</span></span>
+        </div>
+        <div class="addr">
+          <button class="addr-toggle" type="button" aria-expanded="false" aria-controls="java-steps"><span class="label">Java edition <span class="more">How to join</span></span><code>debox.global</code></button>
+          <button class="copy" type="button" id="copy-java" data-copy="debox.global">Copy</button>
+        </div>
+        <div class="steps" id="java-steps" inert>
+          <ol>
+            <li><b>1</b><div><strong>Add the server</strong><p>Open Multiplayer and click Add Server. Enter <code>debox.global</code> as the Server Address.</p></div></li>
+            <li><b>2</b><div><strong>Click Done</strong><p>No port needed on Java. Debox now shows in your server list.</p></div></li>
+            <li><b>3</b><div><strong>Join</strong><p>Double-click Debox, or select it and press Join Server.</p></div></li>
+          </ol>
+        </div>
+        <div class="addr">
+          <button class="addr-toggle" type="button" aria-expanded="false" aria-controls="bedrock-steps"><span class="label">Bedrock edition <span class="more">How to join</span></span><code>debox.global <span>port</span> 8147</code></button>
+          <button class="copy" type="button" id="copy-bedrock" data-copy="debox.global">Copy</button>
+        </div>
+        <div class="steps" id="bedrock-steps" inert>
+          <ol>
+            <li><b>1</b><div><strong>Type the IP</strong><p>Go to Play, then Servers, then Add Server. Enter <code>debox.global</code> as the Server Address.</p></div></li>
+            <li><b>2</b><div><strong>Add the port</strong><p>Set the Port to <code>8147</code>. The default 19132 will not connect.</p></div></li>
+            <li><b>3</b><div><strong>Click Save and join</strong><p>Tap Save, pick Debox from your server list and press Join Server.</p></div></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section id="features">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="label">Beyond the mine</span>
+        <h2>Plenty to do between digs.</h2>
+      </div>
+      <div class="feat">
+        <article><span class="cmd">/rebirth</span><h3>Rebirths</h3><p>Reset your climb for points you keep forever, then spend them on a nine-branch skill tree.</p></article>
+        <article><span class="cmd">/pets</span><h3>Pets</h3><p>Fifteen pet types hatched from eggs. Level them, fuse them and trade them with other players.</p></article>
+        <article><span class="cmd">/pmine</span><h3>Private mines</h3><p>Your own sky mine with minions that keep working while you play elsewhere.</p></article>
+        <article><span class="cmd">/gang</span><h3>Gangs and Gang Wars</h3><p>Team up, climb the Top Gangs board and fight for double money and Fortune in the weekly Gang War.</p></article>
+        <article><span class="cmd">/bazaar</span><h3>Bazaar</h3><p>Place buy and sell orders on 30 materials. Set your price and let the market fill it, even while you mine.</p></article>
+        <article><span class="cmd">/upgrades</span><h3>Upgrades</h3><p>Fourteen permanent upgrades for money, XP, Fortune, break speed, walk speed, pet XP and more. Level them up as you earn.</p></article>
+        <article><span class="cmd">/ah</span><h3>Auction House</h3><p>List your best gear, pets and drops for other players to buy, or hunt the listings for a deal.</p></article>
+        <article><span class="cmd">/contracts</span><h3>Quests and contracts</h3><p>Daily quests with streaks, weekly contracts, a season pass and ten mastery paths.</p></article>
+        <article><span class="cmd">/mastery</span><h3>Mastery</h3><p>Every material has its own mastery level. The more you mine it, the more it pays, and a matching charm boosts it even further.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="leaderboards" class="band lb-sec">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="label">Live from the server</span>
+        <h2>Leaderboards</h2>
+        <p>The top 10 on every board, refreshed every few minutes.</p>
+      </div>
+      <div class="lb-bar">
+        <div class="lb-tabs" id="lb-tabs" role="tablist" aria-label="Boards"></div>
+        <div class="lb-scope" id="lb-scope" role="group" aria-label="Time range">
+          <button type="button" data-scope="all" aria-pressed="true">All time</button>
+          <button type="button" data-scope="week" aria-pressed="false">This week</button>
+        </div>
+      </div>
+      <div class="lb" id="lb" aria-live="polite">
+        <ol class="lb-podium" id="lb-podium"></ol>
+        <ol class="lb-list" id="lb-list" start="4"></ol>
+        <p class="lb-empty" id="lb-empty" hidden></p>
+      </div>
+      <p class="label lb-foot" id="lb-foot"></p>
+    </div>
+  </section>
+
+  <section id="patches" class="pn-sec">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="label">Changelog</span>
+        <h2>Patch notes</h2>
+        <p>Every update, straight from the updates channel on the Discord.</p>
+      </div>
+      <div class="pn">
+        <div class="pn-tabs" id="pn-tabs" role="tablist" aria-label="Patches"></div>
+        <article class="pn-body md" id="pn-body" role="tabpanel" aria-live="polite"></article>
+      </div>
+    </div>
+  </section>
+<!-- PATCHNOTES:START -->
+<script type="application/json" id="patch-data">[{"v": "2.19.1", "md": "# Patch 2.19.1\n## Bug fixes:\n> ### Park wood gear named without \"Wood\" (like `Spruce Sword`) now gets its proper name\n> -# Fixes itself when you join, hold it, or take it out of a vault, ender chest, mail or the AH"}, {"v": "2.19", "md": "# Patch 2.19\n## Bug fixes:\n> ### Fixed a bug with item naming and indexing\n> ### Enchanting table offers no longer reset every 6 hours\n\n## Changes:\n> ### `/gang top` now ranks gangs on more than level\n> -# Score comes from level, kills, gang quests, blocks mined and gang wars won\n> -# New tabs to sort the board by each stat\n> ### Axes can now mine `beacons`\n\n## Additions:\n> ### Added `Gang Wars`\n> -# Every week the gang that mines the most blocks wins\n> -# Wars end every Monday at 00:00 UTC, check the standings with `/gang war`\n> ### Added gang chat toggle"}, {"v": "2.18.2", "md": "# Patch 2.18.2\n> ### Added `@ᴍɪɴᴏʀ ᴜᴘᴅᴀᴛᴇ ᴘɪɴɢ` and `@ʟᴀʀɢᴇ ᴜᴘᴅᴀᴛᴇ ᴘɪɴɢ`\n> ### `@ʟᴀʀɢᴇ ᴜᴘᴅᴀᴛᴇ ᴘɪɴɢ` replaced `@ᴜᴘᴅᴀᴛᴇ ᴘɪɴɢ`\n> ### Added `@ᴡᴇʟᴄᴏᴍᴇʀ ᴘɪɴɢ` to #「ʀᴇᴀᴄᴛɪᴏɴ-ʀᴏʟᴇѕ」✨"}, {"v": "2.18.1", "md": "# Patch 2.18.1\n## Changes:\n> ### Pets now look at the block you are looking at rather than following player's cameras\n> ### Pets are now 2x faster"}, {"v": "2.18", "md": "# Patch 2.18\n## Bug fixes:\n> ### Enchant books can be merged in the `anvil` again\n> -# Two books with the same enchant and level make one book a level higher\n> ### `Disenchanting` a book now gives back a clean blank book\n> ### Spare gemstones show up in `/gemstones` again\n> ### `[fortune]` in chat shows your real Fortune\n> ### `Blast` now works on pumpkins\n\n## Changes:\n> ### `Fortune` now gives extra pumpkins\n> ### Mythic Key removed from `Astra`'s shop\n> ### Pets float in a semicircle behind you, nametags are bigger\n> ### `Reset Bonus` beacon upgrade removed, points refunded\n> ### `/freeze` alerts staff if a frozen player logs out\n> ### `[haste]` chat placeholder removed\n\n## Additions:\n> ### `Expeditions` bring back more than pet stuff\n> -# Money, Enchant Dust, Beacons, crate keys, Booster Cookies and Reforge Tokens\n> -# Rare: Stars, Vault Vouchers, Enchant Slot Upgrades, Shards and Amplifiers\n> -# Ultra rare: Nebulas\n> ### Protection against bot accounts that scan the server\n> ### `Private Mine Themes` in `/pm`\n> -# 15 looks, from achievements, money, shards or the Starter Bundle\n> ### `Gem Auto-Refine` toggle in `/gemstones`\n> ### `Daily Deal`: one trader offer is 20% off each day (`/deal`)\n> ### `/cf \u003camount>` money coinflip\n> ### Titan+ ranks get a custom join message (`/joinmsg`)\n> ### Hide other players' pets in `/settings`\n> ### Clickable accept and deny on gang invites\n> ### Chat polls\n> ### `/calc` (short for calculator)\n> ### Auto Farm tells you what it made while you were AFK\n> ### 17 new chat tags in `/tags`\n> ### 16 new chat placeholders\n> -# `[pet]` `[gems]` `[stats]` `[inv]` `[armor]` `[gang]` `[pmine]` `[mined]` `[playtime]` `[shards]` `[dust]` `[ach]` `[streak]` `[rank]` `[fish]` `[votes]`"}, {"v": "2.17", "md": "# Patch 2.17\n## Bug fixes:\n> ### Boost bossbars no longer get stuck on screen\n> ### A new boost's bossbar now starts full\n> ### `@mentions` now work with gradient chat colours\n> ### Saying `afk` or `brb` now opens `Auto Farm` properly\n\n## Changes:\n> ### Mentioning a player turns their name into a light blue `@Name`\n> -# Works with or without the @, and with nicknames\n> ### Spamming chat now gives an automatic mute\n\n## Additions:\n> ### `Auto Rebirth`, unlocked at 500 rebirths\n> -# Toggle it in the `Rebirth Menu`, it always keeps 25% of your balance\n> ### Gens show a countdown until they reset\n> ### `Right-click` a pet in `/pets` to favourite it\n> -# Favourites sort first and can't be recycled\n> ### Nicknamed pets show their name above them\n> ### `/ah watch \u003cwords>` pings you when a matching item is listed\n> ### `/ignore \u003cplayer>` hides their chat\n> ### `Trivia` in chat, first right answer wins 1-3 Shards\n> ### `Secret achievements` in `/achievements`\n> -# 14 hidden ones, some silly, some hard. Good luck\n> ### `Quest streaks`: finish every daily quest 7 days in a row for an Epic Key\n> ### Tab completion on more commands"}, {"v": "2.16", "md": "YOURS:\n\n# Patch 2.16\n## Bug fixes:\n> ### `Blast` now works in `private mines`\n> ### Blasts no longer destroy `beacon blocks` without giving beacons\n> ### `/stats` beacon gain now shows your real total\n\n## Changes:\n> ### `Beacon blocks` are only affected by `Efficiency` and beacons per block\n> ### Removed the `Rare Key` from Dusty's trades\n> ### `NPC trade menus` are much faster\n> ### Reworked the `gemstone menus`\n> -# Faster, new look, progress bars, spares grouped by type\n> ### `/stats` now counts gemstones, global boosts and everything else\n> ### `Auto Farm` opens after 30s if you say `afk` or `brb`\n> ### `/pay` asks to confirm over 10% of your balance\n\n## Additions:\n> ### `Damage` tile in `/stats`\n> ### `Equip Best` button in `/gemstones`\n> ### Sell spare gems for 25% of their cost\n> -# `Shift-right-click` a spare twice\n> ### Gem tiles show their refine quest progress\n> ### `Shift-click` trades at Dusty, Ember, Astra or Coralith to buy max\n> ### `Right-click` premium cosmetics in `/shardshop` to preview\n> ### The `anvil` shows which stats change before you forge\n> ### The `reforge` button lists every possible reforge\n> ### `/profile` shows this session's and your best session's blocks\n> ### The `warp menu` shows beacon mine and private mine fullness\n> ### `Mastery` level ups show on screen\n> ### Combos play a sound every 25 blocks\n> ### Key finds, refills and join messages are clickable\n> ### Offline `auction house` sales are summed up when you join\n> ### Players back after 7+ days get a money voucher in `/mail`\n> ### Boss kills and Exotic Keys post in Discord\n\n\nMINE:\n\n# Patch 2.16\n## Bug fixes:\n> ### `Blast` now works in `private mines`\n> ### Blasts no longer destroy `beacon blocks` without giving beacons\n> ### `/stats` beacon gain now shows your real total\n> ### Minor `Beacon` optimization\n> ### `/stats` now displays everything that boosts a stat\n> ### Key finds, refills and join messages are clickable\n> ### `Right-click` premium cosmetics in `/shardshop` to preview\n> ### Boss kills and Exotic Keys post in `Discord`\n\n## Changes:\n> ### `NPC trade menus` are much faster (around 10-25x)\n> ### Reworked the `/gemstone` and the `gemstone shop`\n> ### `/pay` asks to confirm over 10% of your balance\n> ### `Mastery` level ups now have a title when leveling\n\n## Additions:\n> ### Added `damage` to `/stats`\n> ### `Equip Best` button in `/gemstones`\n> ### Sell gems for 25% of their cost\n> -# `Shift-right-click` a gem twice\n> ### Gems show their quest progress\n> ### `Shift-click` trades at Dusty, Ember, Astra or Coralith to buy max\n> ### The `anvil` shows which stats change before you forge\n> ### The `reforge` button lists every possible reforge\n> ### `/profile` shows this session's and your best session's blocks\n> ### The `warp menu` shows beacon mine and private mine fullness\n> ### Offline `auction house` sales are summed up when you join"}, {"v": "2.15", "md": "# Patch 2.15\n## Additions:\n> ### Added `Pet Abilities`\n> -# Every pet type unlocks its own ability at level 25. Check a pet's lore to see what it does\n> ### Added the `Pet Daycare`\n> -# Leave up to 3 pets for 1, 4, 12, 24 or 48 hours and they come back with pet XP\n> ### Added `Pet Expeditions`\n> -# Send up to 3 spare pets away for 1, 4 or 8 hours. They come back with pet food, eggs, sometimes a held item, and pet XP\n> ### Added `Pet Ascension`\n> -# Reset a level 100 pet to level 1 for a permanent star. Each star gives +5% to every stat, up to 3 stars\n> ### Added the `Hatchery`\n> -# Combine 2 eggs and some money into 1 egg of the next rarity up\n> ### Added `Pet Nicknames`\n> -# `Right-click` a Pet Name Tag to rename a pet\n> -# Get them from the `/shardshop` Misc page for 25 shards, or find one while mining (as rare as a Nebula)\n> ### Added `Pet Loadouts`\n> -# Save up to 5 sets of equipped pets and swap between them in one click\n> ### Added `Pet Skins`\n> -# New looks for your pets, bought with shards\n> ### Added the `Pet Collection`\n> -# Tracks every pet type at every rarity you have owned. Milestones pay money and shards"}, {"v": "2.14", "md": "# Patch 2.14\n## Changes:\n> ### Reworked `pets`\n> -# There are now `15 pet types`, each with fixed stats. Some boost one thing a lot, some boost two or three things a bit less\n> -# A pet's rarity comes from its egg. `Common` is the weakest, `Exotic` the strongest, and every egg can hatch any type\n> -# Pets level from 1 to 100.\n> -# `Pet sizes`, `colors` and `fusion` have been removed\n> ### All old pets have been refunded to your `/mail`\n> ### `Shiny Dew` has moved to the `/shardshop` Misc page\n> -# A shiny pet gets +20% on every stat. Hae to come out shiny on their own\n\n## Additions:\n> ### Added `Pet Upgrades`\n> -# Click the anvil in `/pets` to send a pet to the sitter and raise it one rarity\n> -# Costs money and takes time, one pet at a time. Its level and shine carry over\n> ### Added `Pet Recycling`\n> -# Click the hopper in `/pets` to turn spare pets into pet food. Higher rarity gives better food\n> -# Recycling a shiny pet gives a `Shiny dew`\n> -# Right-click the hopper to turn on `auto-recycle`, which recycles a hatch you already own at that rarity\n> ### Pets can now boost `Efficiency`, `Damage` and `Defense`"}]</script>
+<!-- PATCHNOTES:END -->
+
+  <div class="band">
+    <section>
+      <div class="wrap two">
+        <div id="vote">
+          <div class="sec-head" style="margin-bottom:1.75rem">
+            <span class="label">Daily</span>
+            <h2>Vote for Debox</h2>
+            <p>Each vote site counts once a day, and every vote pays out in game, even if you were offline.</p>
+          </div>
+          <ul class="perks">
+            <li>An uncommon crate key, a shard, money and a vote point for every vote</li>
+            <li>A rare key bonus when you keep a 7-day streak</li>
+            <li>Every 25 votes on the server starts a vote party for everyone online</li>
+          </ul>
+          <div class="vote-meter" id="vote-meter" aria-live="polite">
+            <span class="label"><b id="vote-count">0</b> / 7 voted today</span>
+            <div class="vote-bar"><i id="vote-fill"></i></div>
+          </div>
+          <div class="sites">
+            <a href="https://minecraft-mp.com/server/360017/vote/" target="_blank" rel="noopener">Minecraft-MP <span>1</span></a>
+            <a href="https://www.planetminecraft.com/server/debox/vote/" target="_blank" rel="noopener">PlanetMinecraft <span>2</span></a>
+            <a href="https://topg.org/minecraft-servers/server-683652" target="_blank" rel="noopener">TopG <span>3</span></a>
+            <a href="https://minecraft.buzz/vote/debox" target="_blank" rel="noopener">Minecraft.buzz <span>4</span></a>
+            <a href="https://minecraft-statistic.net/en/server/debox.html" target="_blank" rel="noopener">Minecraft-statistic <span>5</span></a>
+            <a href="https://www.minerank.com/debox/vote#vote-now" target="_blank" rel="noopener">Minerank <span>6</span></a>
+            <a href="https://trackyserver.com/server/3586448#vote" target="_blank" rel="noopener">Trackyserver <span>7</span></a>
+          </div>
+        </div>
+
+        <div id="store">
+          <div class="sec-head" style="margin-bottom:1.75rem">
+            <span class="label">Support the server</span>
+            <h2>Store</h2>
+            <p>Ranks, bundles and gamepasses keep Debox running. Purchases are delivered in game, even when you are offline.</p>
+          </div>
+          <div class="ranks-row" aria-label="Ranks">
+            <b style="--r:#FFBF40">CITIZEN</b><b style="--r:#55FF55">MERCHANT</b><b style="--r:#55FFFF">NOBLE</b><b style="--r:#FF7BFF">LEGEND</b><b style="--r:#A303F9">MYTHIC</b>
+            <b style="--r:#FF8A3D">TITAN</b><b style="--r:#3DFFC4">ASCENDANT</b><b style="--r:#7DA0FF">CELESTIAL</b><b style="--r:#FFE45C">ETERNAL</b><b style="--r:#FF3D7F">CUSTOM</b>
+          </div>
+          <ul class="perks">
+            <li>Ranks raise your money and material multipliers and add vault space</li>
+            <li>Gamepasses like Fly, Instant Warp and Merchant for lower trade tax</li>
+            <li>No paid loot boxes: real money never buys a random reward</li>
+          </ul>
+          <a class="btn btn-gold" href="https://debox.tebex.io" target="_blank" rel="noopener">Open the store</a>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section id="faq">
+    <div class="wrap faq-wrap">
+      <div class="sec-head">
+        <span class="label">Questions</span>
+        <h2>FAQ</h2>
+        <p>Can't find your answer? Ask in the Discord.</p>
+      </div>
+      <div class="faq">
+        <details><summary>Is Debox free to play?</summary><p>Yes. Everything in the game can be earned by playing. The store is optional and sells ranks, bundles and gamepasses.</p></details>
+        <details><summary>Does real money buy random loot?</summary><p>No. Nothing you pay for gives a random reward. Crates and pet eggs are earned in game, by mining, voting and playing.</p></details>
+        <details><summary>Can I play on my phone or console?</summary><p>Phones, tablets and Windows PCs on Bedrock can add the server directly: address <code>debox.global</code>, port <code>8147</code>. Xbox, PlayStation and Switch don't let you add your own servers, so they need a third-party workaround.</p></details>
+        <details><summary>Which versions can join?</summary><p>Java 1.21 and newer. On Bedrock, keep the game updated to the latest version.</p></details>
+        <details><summary>Where do I start?</summary><p>Join and follow the tutorial. The compass in your last hotbar slot opens <code>/menu</code>, which links to everything else.</p></details>
+        <details><summary>Can I play with friends?</summary><p>Yes. Start a gang with <code>/gang</code>, trade with <code>/trade</code>, and buy and sell on the <code>/bazaar</code> and <code>/ah</code>.</p></details>
+        <details><summary>How do I report a player or a bug?</summary><p>Use <code>/report</code> in game, or make a ticket in the Discord. Report bugs and exploits privately in a ticket. Abusing them gets you banned.</p></details>
+        <details><summary>I got punished. Can I appeal?</summary><p>Yes. Make a ticket in the Discord and explain calmly what happened. Appeals in public chat are ignored.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap cta">
+      <div>
+        <h2>Join the Discord</h2>
+        <p>Patch notes, events, giveaways and support. Link your account and get pinged for the things you care about. Videos go up on YouTube.</p>
+      </div>
+      <div class="cta-btns">
+        <a class="btn btn-gold" href="https://discord.gg/ATyJkaeKTv" target="_blank" rel="noopener">discord.gg/ATyJkaeKTv</a>
+        <a class="btn" href="https://www.youtube.com/@Debox.global" target="_blank" rel="noopener"><svg class="yt" viewBox="0 0 24 17" aria-hidden="true"><rect width="24" height="17" rx="4.5" fill="#ff3d3d"/><path d="M9.6 4.8v7.4l6.2-3.7z" fill="#fff"/></svg>YouTube</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>&copy; 2026 Debox. Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.</span>
+    <nav aria-label="Footer">
+      <a href="#features">Features</a>
+      <a href="#patches">Patch notes</a>
+      <a href="#vote">Vote</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://debox.tebex.io" target="_blank" rel="noopener">Store</a>
+      <a href="https://discord.gg/ATyJkaeKTv" target="_blank" rel="noopener">Discord</a>
+      <a href="https://www.youtube.com/@Debox.global" target="_blank" rel="noopener">YouTube</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+// Copy buttons
+document.querySelectorAll(".copy").forEach(function (b) {
+  b.addEventListener("click", function () {
+    var text = b.dataset.copy;
+    var done = function () {
+      b.textContent = "Copied"; b.classList.add("done");
+      setTimeout(function () { b.textContent = "Copy"; b.classList.remove("done"); }, 1600);
+    };
+    var fallback = function () {
+      var code = b.parentElement.querySelector("code");
+      var r = document.createRange(); r.selectNodeContents(code);
+      var s = getSelection(); s.removeAllRanges(); s.addRange(r);
+      b.textContent = "Selected";
+    };
+    try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
+  });
+});
+
+// How-to-join steps, one panel open at a time
+(function () {
+  var toggles = document.querySelectorAll(".addr-toggle");
+  function set(t, open) {
+    var s = document.getElementById(t.getAttribute("aria-controls"));
+    t.setAttribute("aria-expanded", open);
+    s.classList.toggle("open", open);
+    s.inert = !open;
+  }
+  toggles.forEach(function (t) {
+    t.addEventListener("click", function () {
+      var open = t.getAttribute("aria-expanded") !== "true";
+      toggles.forEach(function (o) { if (o !== t) set(o, false); });
+      set(t, open);
+    });
+  });
+})();
+
+// Mobile menu
+(function () {
+  var b = document.querySelector(".nav-menu"), links = document.getElementById("nav-links");
+  function set(open) { b.setAttribute("aria-expanded", open); links.classList.toggle("open", open); }
+  b.addEventListener("click", function () { set(b.getAttribute("aria-expanded") !== "true"); });
+  links.addEventListener("click", function (e) { if (e.target.closest("a")) set(false); });
+  addEventListener("keydown", function (e) { if (e.key === "Escape") set(false); });
+})();
+
+// Patch notes: Discord markdown (# ## ### -# > - and inline marks) rendered in the site's skin.
+// The patches are embedded by update_patchnotes.py between the PATCHNOTES markers.
+(function () {
+  var data = document.getElementById("patch-data"), tabs = document.getElementById("pn-tabs"), body = document.getElementById("pn-body");
+  var patches = [];
+  try { patches = JSON.parse(data.textContent); } catch (e) {}
+  if (!patches.length) { document.getElementById("patches").hidden = true; return; }
+
+  function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+  function inline(s) {
+    var codes = [];
+    s = esc(s).replace(/`([^`]+)`/g, function (m, c) { codes.push(c); return "\u0000" + (codes.length - 1) + "\u0000"; });
+    s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+      .replace(/\*\*\*(.+?)\*\*\*/g, "<strong><em>$1</em></strong>")
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/__(.+?)__/g, "<u>$1</u>")
+      .replace(/\*(.+?)\*/g, "<em>$1</em>")
+      .replace(/(^|[^\w])_(.+?)_(?![\w])/g, "$1<em>$2</em>")
+      .replace(/~~(.+?)~~/g, "<s>$1</s>")
+      .replace(/\|\|(.+?)\|\|/g, '<span class="spoiler" tabindex="0" role="button" aria-label="Spoiler">$1</span>');
+    return s.replace(/\u0000(\d+)\u0000/g, function (m, i) { return "<code>" + codes[i] + "</code>"; });
+  }
+  function md(src) {
+    var lines = src.split("\n"), out = [], i = 0, m;
+    var isItem = function (l) { return /^\s*[-*]\s+/.test(l) && !/^-#\s/.test(l); };
+    while (i < lines.length) {
+      var l = lines[i];
+      if (/^>\s?/.test(l)) {
+        var q = [];
+        while (i < lines.length && /^>\s?/.test(lines[i])) q.push(lines[i++].replace(/^>\s?/, ""));
+        out.push("<blockquote>" + md(q.join("\n")) + "</blockquote>");
+        continue;
+      }
+      if (isItem(l)) {
+        var li = [];
+        while (i < lines.length && isItem(lines[i])) li.push("<li>" + inline(lines[i++].replace(/^\s*[-*]\s+/, "")) + "</li>");
+        out.push("<ul>" + li.join("") + "</ul>");
+        continue;
+      }
+      if ((m = l.match(/^(#{1,3})\s+(.*)$/))) { var h = "h" + (m[1].length + 2); out.push("<" + h + ">" + inline(m[2]) + "</" + h + ">"); }
+      else if ((m = l.match(/^-#\s+(.*)$/))) out.push('<p class="sub">' + inline(m[1]) + "</p>");
+      else if (l.trim()) out.push("<p>" + inline(l) + "</p>");
+      i++;
+    }
+    return out.join("");
+  }
+
+  // Large patches (x.xx) are the tabs; their minor patches (x.xx.x) drop down under the open one
+  var order = [], groups = {}, items = [];
+  patches.forEach(function (p) {
+    var key = p.v.split(".").slice(0, 2).join(".");
+    if (!groups[key]) { groups[key] = { large: null, minors: [] }; order.push(key); }
+    if (p.v === key) groups[key].large = p; else groups[key].minors.unshift(p);
+  });
+  order.forEach(function (key) {
+    var g = groups[key];
+    if (!g.large) { g.minors.forEach(function (p) { items.push({ p: p, key: p.v }); }); return; }
+    items.push({ p: g.large, key: key, kids: g.minors.length });
+    g.minors.forEach(function (p) { items.push({ p: p, key: key, minor: true }); });
+  });
+
+  function show(n) {
+    var open = items[n].key;
+    [].forEach.call(tabs.children, function (b, k) {
+      var it = items[k];
+      b.hidden = !!it.minor && it.key !== open;
+      b.setAttribute("aria-selected", k === n); b.tabIndex = k === n ? 0 : -1;
+      if (it.kids) b.setAttribute("aria-expanded", it.key === open);
+    });
+    body.innerHTML = md(items[n].p.md);
+  }
+  tabs.innerHTML = items.map(function (it) {
+    var end = (it.p === patches[0] ? '<small class="new">Latest</small>' : it.minor ? "<small>Minor</small>" : "") +
+      (it.kids ? '<i class="chev" aria-hidden="true"></i>' : "");
+    return '<button type="button" role="tab" aria-controls="pn-body"' + (it.minor ? ' class="minor"' : "") + ">" + esc(it.p.v) + '<span class="pn-end">' + end + "</span></button>";
+  }).join("");
+  tabs.addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (b) show([].indexOf.call(tabs.children, b));
+  });
+  tabs.addEventListener("keydown", function (e) {
+    var d = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key]; if (!d) return;
+    e.preventDefault();
+    var vis = [].filter.call(tabs.children, function (b) { return !b.hidden; });
+    var k = [].indexOf.call(tabs.children, vis[(vis.indexOf(document.activeElement) + d + vis.length) % vis.length]);
+    show(k); tabs.children[k].focus();
+  });
+  body.addEventListener("click", function (e) { var s = e.target.closest(".spoiler"); if (s) s.classList.add("shown"); });
+  body.addEventListener("keydown", function (e) { var s = e.target.closest(".spoiler"); if (s && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); s.classList.add("shown"); } });
+  show(items.map(function (it) { return it.p; }).indexOf(patches[0]));
+})();
+
+// Live leaderboards. economy/webexport.sk on the server pushes the top 10 of every
+// /leaderboard board into a public GitHub gist every 5 minutes; this reads it.
+// Set LB_URL to the raw URL that /webexport prints in game.
+(function () {
+  var LB_URL = "";
+  var BOARDS = [["mined", "Blocks mined"], ["balance", "Money"], ["playtime", "Playtime"], ["beacon", "Beacons"], ["votes", "Votes"], ["fortune", "Fortune"], ["kills", "Kills"], ["shards", "Shards"]];
+  var tabs = document.getElementById("lb-tabs"), scopeEl = document.getElementById("lb-scope");
+  var podium = document.getElementById("lb-podium"), list = document.getElementById("lb-list");
+  var empty = document.getElementById("lb-empty"), foot = document.getElementById("lb-foot");
+  var data = null, board = "mined", scope = "all";
+  var STEVE = "https://mc-heads.net/avatar/MHF_Steve/";
+
+  function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+  // Bedrock (Geyser) players have 00000000-0000-0000-... ids no skin service knows: they get Steve
+  function head(p, size) {
+    var id = /^[0-9a-f-]{36}$/i.test(p.uuid) && p.uuid.indexOf("00000000-0000-0000") !== 0 ? p.uuid : "MHF_Steve";
+    return '<img src="https://mc-heads.net/avatar/' + id + "/" + size + '" alt="" loading="lazy" width="' + size + '" height="' + size + '" onerror="this.onerror=null;this.src=\'' + STEVE + size + '\'">';
+  }
+  function ago(sec) {
+    var m = Math.round((Date.now() / 1000 - sec) / 60);
+    return m < 1 ? "just now" : m < 60 ? m + " min ago" : Math.round(m / 60) + "h ago";
+  }
+
+  function render() {
+    tabs.querySelectorAll("button").forEach(function (b) { b.setAttribute("aria-selected", b.dataset.board === board); b.tabIndex = b.dataset.board === board ? 0 : -1; });
+    var hasWeek = !!(data && data.boards && data.boards["week_" + board]);
+    if (!hasWeek) scope = "all";
+    scopeEl.querySelectorAll("button").forEach(function (b) {
+      b.setAttribute("aria-pressed", b.dataset.scope === scope);
+      if (b.dataset.scope === "week") { b.disabled = !hasWeek; b.title = hasWeek ? "" : "This board has no weekly version"; }
+    });
+    var rows = data && data.boards ? data.boards[(scope === "week" ? "week_" : "") + board] || [] : null;
+    podium.innerHTML = list.innerHTML = "";
+    empty.hidden = !!(rows && rows.length);
+    if (!rows) { empty.textContent = "Leaderboards go live here soon. Until then, check /leaderboard in game."; return; }
+    if (!rows.length) { empty.textContent = scope === "week" ? "Nobody is on this board yet this week. Be the first." : "Nobody is on this board yet."; return; }
+    podium.innerHTML = rows.slice(0, 3).map(function (p, k) {
+      return '<li><span class="rk">#' + (k + 1) + "</span>" + head(p, k ? 56 : 76) + '<span class="nm">' + esc(p.name) + '</span><span class="vl">' + esc(p.value) + "</span></li>";
+    }).join("");
+    list.innerHTML = rows.slice(3).map(function (p, k) {
+      return '<li style="animation-delay:' + k * 0.03 + 's"><span class="rk">' + (k + 4) + "</span>" + head(p, 28) + '<span class="nm">' + esc(p.name) + '</span><span class="vl">' + esc(p.value) + "</span></li>";
+    }).join("");
+  }
+
+  tabs.innerHTML = BOARDS.map(function (b) { return '<button type="button" role="tab" data-board="' + b[0] + '">' + b[1] + "</button>"; }).join("");
+  tabs.addEventListener("click", function (e) { var b = e.target.closest("button"); if (b) { board = b.dataset.board; render(); } });
+  tabs.addEventListener("keydown", function (e) {
+    var d = { ArrowRight: 1, ArrowLeft: -1 }[e.key]; if (!d) return;
+    var bs = tabs.querySelectorAll("button"), i = [].indexOf.call(bs, document.activeElement);
+    if (i < 0) return;
+    e.preventDefault(); var n = bs[(i + d + bs.length) % bs.length]; board = n.dataset.board; render(); n.focus();
+  });
+  scopeEl.addEventListener("click", function (e) { var b = e.target.closest("button"); if (b && !b.disabled) { scope = b.dataset.scope; render(); } });
+
+  function load() {
+    if (!LB_URL) { render(); foot.textContent = ""; return; }
+    var ctl = new AbortController(); setTimeout(function () { ctl.abort(); }, 8000);
+    // the raw gist URL is CDN-cached; a 5-minute bucket in the query keeps it fresh
+    fetch(LB_URL + "?t=" + Math.floor(Date.now() / 3e5), { signal: ctl.signal, cache: "no-store" })
+      .then(function (r) { if (!r.ok) throw r.status; return r.json(); })
+      .then(function (d) {
+        data = d; render();
+        var up = Number(d.updated);
+        foot.innerHTML = up ? "<i></i>Updated " + ago(up) + (d.online ? " &middot; " + esc(d.online) + " online" : "") : "";
+      })
+      .catch(function () { if (!data) { render(); foot.textContent = "Couldn't reach the leaderboards right now."; } });
+  }
+  load(); setInterval(function () { if (!document.hidden) load(); }, 3e5);
+})();
+
+// Vote checklist: remembers which sites this browser clicked in the last 24 hours
+(function () {
+  var KEY = "debox-votes", DAY = 864e5, links = document.querySelectorAll(".sites a"), seen = {};
+  try { seen = JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) {}
+  function paint() {
+    var now = Date.now(), done = 0;
+    links.forEach(function (a, k) {
+      var left = (seen[k] || 0) + DAY - now, tag = a.querySelector("span");
+      if (left > 0) {
+        done++; a.dataset.voted = "";
+        var h = Math.ceil(left / 36e5);
+        tag.textContent = h > 1 ? "again in " + h + "h" : "again soon";
+      } else { delete a.dataset.voted; tag.textContent = k + 1; }
+    });
+    document.getElementById("vote-count").textContent = done;
+    document.getElementById("vote-fill").style.width = (done / links.length * 100) + "%";
+  }
+  links.forEach(function (a, k) {
+    a.addEventListener("click", function () {
+      seen[k] = Date.now();
+      try { localStorage.setItem(KEY, JSON.stringify(seen)); } catch (e) {}
+      paint();
+    });
+  });
+  paint(); setInterval(paint, 6e4);
+})();
+
+// Live status from mcsrvstat.us (works on the real host; falls back quietly when blocked)
+(function () {
+  var el = document.getElementById("status"), txt = document.getElementById("status-text");
+  var ctl = new AbortController(); setTimeout(function () { ctl.abort(); }, 6000);
+  fetch("https://api.mcsrvstat.us/3/debox.global", { signal: ctl.signal })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (d.online) { el.dataset.state = "up"; txt.textContent = (d.players ? d.players.online : 0) + " playing now"; }
+      else { el.dataset.state = "down"; txt.textContent = "Offline right now"; }
+    })
+    .catch(function () { txt.textContent = "Online 24/7"; });
+})();
+
+/* ticker removed
+(function () {
+  var mats = ["Wood","Stone","Coal","Iron","Gold","Emerald","Amethyst","Lapis","Diamond","Resin","Birch","Spruce","Jungle","Acacia","Dark Oak","Mangrove","Cherry","Pale Oak","Copper","Redstone","Dripstone","Moss","Glowworm","Yooperlite","Cassiterite","Voidstone","Netherrack","Nether Brick","Basalt","Blackstone","Gilded Blackstone","Magma","Quartz","Glowstone","Bone","Netherite","End Stone","End Stone Brick","Purpur","Sculk","Enderite","Void","Nil","Shulker","Obsidian","Crying Obsidian","Prismarine","Dark Prismarine","Oxidized Copper","Salt","Kelp","Sponge","Dead Coral"];
+  var worlds = [[10,"--w-over"],[18,"--w-park"],[26,"--w-deep"],[36,"--w-neth"],[46,"--w-end"],[53,"--w-ocean"]];
+  var html = mats.map(function (m, i) {
+    var n = i + 1, w = worlds.find(function (x) { return n <= x[0]; })[1];
+    return '<span style="--c:var(' + w + ')"><b>' + String(n).padStart(2, "0") + "</b>" + m + "</span>";
+  }).join("");
+  var t = document.getElementById("ticker");
+  t.innerHTML = html + '<i aria-hidden="true" style="display:contents">' + html + "</i>";
+  t.lastElementChild.querySelectorAll("span").forEach(function (s) { s.setAttribute("aria-hidden", "true"); });
+})();
+*/
+
+// Ore wall behind the hero: a pixel field of stone and ore you can mine by clicking
+(function () {
+  var surf = document.querySelector(".surface");
+  var c = document.getElementById("ore"), g = c.getContext("2d");
+  var ores = [["#ffd23d", "Gold"], ["#6fae4a", "Emerald"], ["#4fd1c5", "Prismarine"], ["#d07a4a", "Copper"], ["#c9b8ff", "Purpur"]];
+  var cell = 18, cols = 0, rows = 0, grid = [], parts = [], pops = [], hover = -1, mined = 0, last = 0;
+  var still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var hint = document.getElementById("hint");
+
+  function stone() {
+    return { ore: Math.random() < 0.03 ? (Math.random() * ores.length) | 0 : -1, t: Math.random() * 6.28, shade: 14 + ((Math.random() * 10) | 0), broken: 0 };
+  }
+
+  // Fit the canvas to the hero without stretching: keep the blocks already placed and
+  // add or drop whole rows/columns at the edges (the join steps grow the hero downward)
+  function fit() {
+    var w = c.clientWidth, h = c.clientHeight, dpr = Math.min(devicePixelRatio || 1, 2);
+    c.width = w * dpr; c.height = h * dpr; g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var nc = Math.ceil(w / cell), nr = Math.ceil(h / cell), next = [];
+    for (var y = 0; y < nr; y++) for (var x = 0; x < nc; x++) {
+      next.push(x < cols && y < rows ? grid[y * cols + x] : stone());
+    }
+    cols = nc; rows = nr; grid = next;
+    if (hover >= grid.length) hover = -1;
+  }
+
+  function block(x, y, b, time) {
+    var s = b.shade;
+    if (b.ore >= 0) {
+      g.fillStyle = "#1d1a15"; g.fillRect(x, y, cell, cell);
+      var a = g.globalAlpha;
+      g.globalAlpha = a * (still ? 0.8 : 0.5 + 0.4 * Math.sin(time / 1400 + b.t));
+      g.fillStyle = ores[b.ore][0];
+      g.fillRect(x + 4, y + 4, 4, 4); g.fillRect(x + 10, y + 9, 4, 4); g.fillRect(x + 5, y + 12, 2, 2);
+      g.globalAlpha = a;
+    } else {
+      g.fillStyle = "rgb(" + (s + 6) + "," + (s + 3) + "," + s + ")"; g.fillRect(x, y, cell, cell);
+    }
+  }
+
+  function draw(time) {
+    var dt = Math.min(50, time - (last || time)); last = time;
+    for (var y = 0; y < rows; y++) for (var x = 0; x < cols; x++) {
+      var b = grid[y * cols + x], px = x * cell, py = y * cell;
+      if (b.broken) {
+        var age = time - b.broken;
+        g.fillStyle = "#080706"; g.fillRect(px, py, cell, cell);
+        if (age > 4400) { g.globalAlpha = Math.min(1, (age - 4400) / 600); block(px, py, b, time); g.globalAlpha = 1; }
+        if (age > 5000) b.broken = 0;
+      } else block(px, py, b, time);
+    }
+    if (hover >= 0 && !grid[hover].broken) {
+      g.strokeStyle = "rgba(255,255,255,.65)"; g.lineWidth = 1;
+      g.strokeRect((hover % cols) * cell + 0.5, ((hover / cols) | 0) * cell + 0.5, cell - 1, cell - 1);
+    }
+    for (var i = parts.length - 1; i >= 0; i--) {
+      var p = parts[i]; p.life -= dt; if (p.life <= 0) { parts.splice(i, 1); continue; }
+      p.vy += 0.0012 * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+      g.globalAlpha = Math.min(1, p.life / 300); g.fillStyle = p.col; g.fillRect(p.x, p.y, 3, 3);
+    }
+    g.font = "12px Silkscreen, monospace"; g.textAlign = "center";
+    for (var j = pops.length - 1; j >= 0; j--) {
+      var q = pops[j], k = (time - q.born) / 1100; if (k >= 1) { pops.splice(j, 1); continue; }
+      g.globalAlpha = 1 - k * k; g.fillStyle = q.col; g.fillText(q.text, q.x, q.y - k * 34);
+    }
+    g.globalAlpha = 1;
+  }
+
+  function cellAt(e) {
+    var r = c.getBoundingClientRect(), x = ((e.clientX - r.left) / cell) | 0, y = ((e.clientY - r.top) / cell) | 0;
+    return x >= 0 && y >= 0 && x < cols && y < rows ? y * cols + x : -1;
+  }
+  surf.addEventListener("pointermove", function (e) { hover = e.target.closest(".join, a, button") ? -1 : cellAt(e); });
+  surf.addEventListener("pointerleave", function () { hover = -1; });
+  surf.addEventListener("pointerdown", function (e) {
+    if (e.target.closest(".join, a, button")) return;
+    var i = cellAt(e); if (i < 0 || grid[i].broken) return;
+    var b = grid[i], now = performance.now(), cx = (i % cols) * cell + cell / 2, cy = ((i / cols) | 0) * cell + cell / 2;
+    var col = b.ore >= 0 ? ores[b.ore][0] : "#6b6356";
+    b.broken = now;
+    for (var n = 0; n < (still ? 0 : 12); n++) parts.push({ x: cx, y: cy, vx: (Math.random() - 0.5) * 0.25, vy: -Math.random() * 0.35, life: 500 + Math.random() * 400, col: Math.random() < 0.5 ? col : "#3a342b" });
+    pops.push({ x: cx, y: cy - 6, born: now, col: b.ore >= 0 ? col : "#efe8d8", text: "+1 " + (b.ore >= 0 ? ores[b.ore][1] : "Stone") });
+    mined++; hint.textContent = mined === 1 ? "1 block mined. 52 materials to go" : mined + " blocks mined. Imagine the real thing";
+  });
+
+  function loop(t) { draw(t); requestAnimationFrame(loop); }
+  fit(); requestAnimationFrame(loop);
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(c);
+  else addEventListener("resize", fit);
+})();
+</script>
