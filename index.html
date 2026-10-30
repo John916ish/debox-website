@@ -770,7 +770,7 @@ document.querySelectorAll(".copy").forEach(function (b) {
 // /leaderboard board into a public GitHub gist every 5 minutes; this reads it.
 // Set LB_URL to the raw URL that /webexport prints in game.
 (function () {
-  var LB_URL = "";
+  var LB_URL = "https://gist.githubusercontent.com/John916ish/8aea1be8343cfe20d75380dbfcb656e7/raw/leaderboards.json";
   var BOARDS = [["mined", "Blocks mined"], ["balance", "Money"], ["playtime", "Playtime"], ["beacon", "Beacons"], ["votes", "Votes"], ["fortune", "Fortune"], ["kills", "Kills"], ["shards", "Shards"]];
   var tabs = document.getElementById("lb-tabs"), scopeEl = document.getElementById("lb-scope");
   var podium = document.getElementById("lb-podium"), list = document.getElementById("lb-list");
@@ -784,6 +784,8 @@ document.querySelectorAll(".copy").forEach(function (b) {
     var id = /^[0-9a-f-]{36}$/i.test(p.uuid) && p.uuid.indexOf("00000000-0000-0000") !== 0 ? p.uuid : "MHF_Steve";
     return '<img src="https://mc-heads.net/avatar/' + id + "/" + size + '" alt="" loading="lazy" width="' + size + '" height="' + size + '" onerror="this.onerror=null;this.src=\'' + STEVE + size + '\'">';
   }
+  // playtime comes as "0d 3h 28m"; drop the empty leading units
+  function val(v) { return String(v).replace(/^(0d )(0h )?/, ""); }
   function ago(sec) {
     var m = Math.round((Date.now() / 1000 - sec) / 60);
     return m < 1 ? "just now" : m < 60 ? m + " min ago" : Math.round(m / 60) + "h ago";
@@ -797,16 +799,16 @@ document.querySelectorAll(".copy").forEach(function (b) {
       b.setAttribute("aria-pressed", b.dataset.scope === scope);
       if (b.dataset.scope === "week") { b.disabled = !hasWeek; b.title = hasWeek ? "" : "This board has no weekly version"; }
     });
-    var rows = data && data.boards ? data.boards[(scope === "week" ? "week_" : "") + board] || [] : null;
+    var rows = data && data.boards ? (data.boards[(scope === "week" ? "week_" : "") + board] || []).slice(0, 10) : null;
     podium.innerHTML = list.innerHTML = "";
     empty.hidden = !!(rows && rows.length);
     if (!rows) { empty.textContent = "Leaderboards go live here soon. Until then, check /leaderboard in game."; return; }
     if (!rows.length) { empty.textContent = scope === "week" ? "Nobody is on this board yet this week. Be the first." : "Nobody is on this board yet."; return; }
     podium.innerHTML = rows.slice(0, 3).map(function (p, k) {
-      return '<li><span class="rk">#' + (k + 1) + "</span>" + head(p, k ? 56 : 76) + '<span class="nm">' + esc(p.name) + '</span><span class="vl">' + esc(p.value) + "</span></li>";
+      return '<li><span class="rk">#' + (k + 1) + "</span>" + head(p, k ? 56 : 76) + '<span class="nm">' + esc(p.name) + '</span><span class="vl">' + esc(val(p.value)) + "</span></li>";
     }).join("");
     list.innerHTML = rows.slice(3).map(function (p, k) {
-      return '<li style="animation-delay:' + k * 0.03 + 's"><span class="rk">' + (k + 4) + "</span>" + head(p, 28) + '<span class="nm">' + esc(p.name) + '</span><span class="vl">' + esc(p.value) + "</span></li>";
+      return '<li style="animation-delay:' + k * 0.03 + 's"><span class="rk">' + (k + 4) + "</span>" + head(p, 28) + '<span class="nm">' + esc(p.name) + '</span><span class="vl">' + esc(val(p.value)) + "</span></li>";
     }).join("");
   }
 
@@ -829,7 +831,7 @@ document.querySelectorAll(".copy").forEach(function (b) {
       .then(function (d) {
         data = d; render();
         var up = Number(d.updated);
-        foot.innerHTML = up ? "<i></i>Updated " + ago(up) + (d.online ? " &middot; " + esc(d.online) + " online" : "") : "";
+        foot.innerHTML = up ? "<i></i>Updated " + ago(up) + (Number(d.online) > 0 ? " &middot; " + Number(d.online) + " online" : "") : "";
       })
       .catch(function () { if (!data) { render(); foot.textContent = "Couldn't reach the leaderboards right now."; } });
   }
